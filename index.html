@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -342,7 +342,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;}
 <div id="toast"></div>
 
 <script>
-var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyDGZDOsxwlwn8_J-VODXmMAwPyzY4WVtpwDn9826f1HblWNEi6yaAS37xvgBLbdakZIA/exec";
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwy82dhJK6TpcmLyOYuzuexprtFt5QXCTRQLvPhX3DTi59n-3A0v5_QEDoOlJRzTuyr6g/exec";
 var DEFAULT_PASS = "evobike2026";
 
 var USERS = {
@@ -541,7 +541,7 @@ async function loadLeads(){
     try {
         var vParam = "";
         var body = new URLSearchParams({action:"getLeads", vendedor:vParam});
-        var res  = await fetch(SCRIPT_URL, {method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded"}, body:body.toString()});
+        var res = await fetch(SCRIPT_URL + "?action=getLeads&vendedor=" + encodeURIComponent(vParam));
         var data = await res.json();
         if(data.status!=="ok") throw new Error(data.message||"Error");
 
@@ -741,7 +741,7 @@ async function updateStatus(sel){
     var est = sel.value;
     sel.disabled=true;
     try{
-        var res  = await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({action:"updateLead",ticket_id:tid,sheet:sht,estatus:est}).toString()});
+        var res = await fetch(SCRIPT_URL+"?action=updateLead&ticket_id="+encodeURIComponent(tid)+"&sheet="+encodeURIComponent(sht)+"&estatus="+encodeURIComponent(est));
         var data = await res.json();
         if(data.status!=="ok") throw new Error(data.message||"Error");
         var l=allLeads.find(function(x){ return x["Ticket ID"]===tid; });
@@ -784,7 +784,7 @@ async function saveNotes(){
     var btn    = document.querySelector("#modal-notes .modal-save");
     btn.textContent="..."; btn.disabled=true;
     try{
-        var res  = await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({action:"updateLead",ticket_id:notesLead["Ticket ID"],sheet:notesLead._sheet,notas:notas,cierre:cierre}).toString()});
+        var res = await fetch(SCRIPT_URL+"?action=updateLead&ticket_id="+encodeURIComponent(notesLead["Ticket ID"])+"&sheet="+encodeURIComponent(notesLead._sheet)+"&notas="+encodeURIComponent(notas)+"&cierre="+encodeURIComponent(cierre));
         var data = await res.json();
         if(data.status!=="ok") throw new Error(data.message||"Error");
         var l=allLeads.find(function(x){ return x["Ticket ID"]===notesLead["Ticket ID"]; });
@@ -812,7 +812,7 @@ async function saveAssign(){
     var btn  = document.querySelector("#modal-assign .modal-save");
     btn.textContent="..."; btn.disabled=true;
     try{
-        var res  = await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({action:"updateLead",ticket_id:assignLead["Ticket ID"],sheet:assignLead._sheet,asignado:newV}).toString()});
+        var res = await fetch(SCRIPT_URL+"?action=updateLead&ticket_id="+encodeURIComponent(assignLead["Ticket ID"])+"&sheet="+encodeURIComponent(assignLead._sheet)+"&asignado="+encodeURIComponent(newV));
         var data = await res.json();
         if(data.status!=="ok") throw new Error(data.message||"Error");
         var l=allLeads.find(function(x){ return x["Ticket ID"]===assignLead["Ticket ID"]; });
@@ -970,10 +970,3 @@ function renderPizarron(){
 
 </body>
 </html>
-
-
-
-
-
-
-
