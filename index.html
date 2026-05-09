@@ -549,13 +549,13 @@ async function loadLeads(){
         var sucios = (data.sucios||[]).map(function(l){ return Object.assign({},l,{_type:"sucio"}); });
 
         if(role==="vendor"){
-            clean  = clean.filter(function(l){ return l["ASIGNADO A"]===vendor||l["ASIGNADO A"]==="SIN ASIGNAR"; });
-            sucios = sucios.filter(function(l){ return l["ASIGNADO A"]===vendor||l["ASIGNADO A"]==="SIN ASIGNAR"; });
+            clean  = clean.filter(function(l){ var a=(l["ASIGNADO A"]||"").toUpperCase(); return a===vendor||a==="SIN ASIGNAR"||a===""; });
+            sucios = sucios.filter(function(l){ var a=(l["ASIGNADO A"]||"").toUpperCase(); return a===vendor||a==="SIN ASIGNAR"||a===""; });
         }
 
         if(role==="nadia"){
-            clean  = clean.filter(function(l){ return l["ASIGNADO A"]==="NADIA"||l["ASIGNADO A"]==="SIN ASIGNAR"; });
-            sucios = sucios.filter(function(l){ return l["ASIGNADO A"]==="NADIA"||l["ASIGNADO A"]==="SIN ASIGNAR"; });
+            clean  = clean.filter(function(l){ var a=(l["ASIGNADO A"]||"").toUpperCase(); return a==="NADIA"||a==="SIN ASIGNAR"||a===""; });
+            sucios = sucios.filter(function(l){ var a=(l["ASIGNADO A"]||"").toUpperCase(); return a==="NADIA"||a==="SIN ASIGNAR"||a===""; });
         }
 
         allLeads = clean.concat(sucios);
