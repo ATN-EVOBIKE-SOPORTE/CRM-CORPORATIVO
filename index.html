@@ -430,10 +430,20 @@ function isFirstLogin(v){
 
 // ── LOGIN ─────────────────────────────────────────────────────
 window.onload = function(){
+    // 1. Login por URL params (link directo)
     var p = new URLSearchParams(window.location.search);
     var v = (p.get("vendedor")||"").toUpperCase();
     var pw = p.get("pass")||"";
-    if(v && USERS[v] && getPass(v)===pw){ loginAs(v); }
+    if(v && USERS[v] && getPass(v)===pw){ loginAs(v); return; }
+
+    // 2. Restaurar sesión guardada
+    try {
+        var saved = localStorage.getItem("evo_session");
+        if(saved){
+            var sess = JSON.parse(saved);
+            if(sess.vendor && USERS[sess.vendor]){ loginAs(sess.vendor); return; }
+        }
+    } catch(e){}
 };
 
 document.addEventListener("keydown", function(e){
@@ -454,10 +464,15 @@ function doLogin(){
     }
 }
 
+var autoRefreshInterval = null;
+
 function loginAs(v){
     vendor = v;
     role   = USERS[v].role;
     lang   = USERS[v].lang ? (localStorage.getItem("evo_lang_"+v)||"zh") : "es";
+
+    // Guardar sesión
+    localStorage.setItem("evo_session", JSON.stringify({vendor: v}));
 
     applyLang();
 
@@ -472,11 +487,18 @@ function loginAs(v){
     if(isFirstLogin(v)){
         setTimeout(function(){ openChangePwd(true); }, 900);
     }
+
+    // Auto-refresh silencioso cada 60 segundos
+    if(autoRefreshInterval) clearInterval(autoRefreshInterval);
+    autoRefreshInterval = setInterval(function(){ silentRefresh(); }, 60000);
+
     loadLeads();
 }
 
 function doLogout(){
     vendor=""; role=""; allLeads=[];
+    localStorage.removeItem("evo_session");
+    if(autoRefreshInterval){ clearInterval(autoRefreshInterval); autoRefreshInterval=null; }
     document.getElementById("app").style.display = "none";
     document.getElementById("login-screen").style.display = "flex";
     document.getElementById("login-vendor").value = "";
@@ -590,7 +612,38 @@ async function loadLeads(){
     }
 }
 
-// ── STATS ─────────────────────────────────────────────────────
+// ── SILENT REFRESH (sin spinner, no interrumpe al usuario) ────
+async function silentRefresh(){
+    try {
+        var data = await apiFetch({action:"getLeads", vendedor:""});
+        if(data.status !== "ok") return;
+
+        var clean  = (data.clean ||[]).map(function(l){ return Object.assign({},l,{_type:"clean"}); });
+        var sucios = (data.sucios||[]).map(function(l){ return Object.assign({},l,{_type:"sucio"}); });
+
+        if(role==="vendor"){
+            clean  = clean.filter(function(l){ var a=(l["ASIGNADO A"]||"").toUpperCase(); return a===vendor||a==="SIN ASIGNAR"||a===""; });
+            sucios = sucios.filter(function(l){ var a=(l["ASIGNADO A"]||"").toUpperCase(); return a===vendor||a==="SIN ASIGNAR"||a===""; });
+        }
+        if(role==="nadia"){
+            clean  = clean.filter(function(l){ var a=(l["ASIGNADO A"]||"").toUpperCase(); return a==="NADIA"; });
+            sucios = sucios.filter(function(l){ var a=(l["ASIGNADO A"]||"").toUpperCase(); return a==="NADIA"; });
+        }
+
+        var newLeads = clean.concat(sucios);
+        newLeads.sort(function(a,b){ return new Date(b["Fecha"])-new Date(a["Fecha"]); });
+
+        // Solo actualizar si hay cambios reales
+        if(JSON.stringify(newLeads.map(function(l){ return l["Ticket ID"]+l["ESTATUS"]+l["NOTAS"]; })) !==
+           JSON.stringify(allLeads.map(function(l){ return l["Ticket ID"]+l["ESTATUS"]+l["NOTAS"]; }))){
+            allLeads = newLeads;
+            renderStats(); renderCharts(); renderTable(); showPizarron();
+            showToast("🔄 Datos actualizados");
+        }
+    } catch(e){
+        // Silencioso — no mostrar error en auto-refresh
+    }
+}
 function renderStats(){
     var total = allLeads.length;
     var clean = allLeads.filter(function(l){ return l._type==="clean"; }).length;
