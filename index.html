@@ -941,7 +941,8 @@ function showPizarron(){
         document.getElementById("ptab-vendedor").style.display = "none";
         if(pizarronTab === "vendedor") { pizarronTab = "todos"; setPizarronTab("todos"); }
     } else {
-        document.getElementById("ptab-yoana").style.display = "none";
+        // Vendedores: ven "Mis Notas" + "Notas Yoana"
+        document.getElementById("ptab-yoana").style.display = "block";
         document.getElementById("ptab-todos").style.display = "none";
         document.getElementById("ptab-vendedor").style.display = "block";
     }
