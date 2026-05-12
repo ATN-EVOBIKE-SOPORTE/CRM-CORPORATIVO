@@ -51,6 +51,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;}
 
 /* STATS */
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.stat-accent{position:absolute;top:0;left:0;right:0;height:3px;border-radius:18px 18px 0 0;}
 .stat-card{background:var(--card);border-radius:18px;padding:22px 24px;border:1px solid var(--border);position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;}
 .stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(43,122,75,0.1);}
 .stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:18px 18px 0 0;}
@@ -202,6 +203,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;}
             <!-- Stats -->
             <div class="stats-grid">
                 <div class="stat-card c-green">
+                    <div class="stat-accent" style="background:var(--green)"></div>
                     <div class="stat-label" id="lbl-total">Total Leads</div>
                     <div class="stat-value" id="stat-total">0</div>
                     <div class="stat-sub" id="stat-total-sub">asignados a ti</div>
@@ -342,7 +344,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;}
 <div id="toast"></div>
 
 <script>
-var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyoWmM2PyKRxAj27X1So16z6tCFzpO34jMFGxQxQhWZNvgnlrxF87CXJo2cjJrp7BPBbg/exec";
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxZh_yHJqo8bj7WM05CR8eseoYi2NhcYjvj7Iu3NJ_8ao46XLeLJWKIRZHDJpuYoGU_Gw/exec";
 var DEFAULT_PASS = "evobike2026";
 
 var USERS = {
@@ -430,13 +432,10 @@ function isFirstLogin(v){
 
 // ── LOGIN ─────────────────────────────────────────────────────
 window.onload = function(){
-    // 1. Login por URL params (link directo)
     var p = new URLSearchParams(window.location.search);
     var v = (p.get("vendedor")||"").toUpperCase();
     var pw = p.get("pass")||"";
     if(v && USERS[v] && getPass(v)===pw){ loginAs(v); return; }
-
-    // 2. Restaurar sesión guardada
     try {
         var saved = localStorage.getItem("evo_session");
         if(saved){
@@ -471,9 +470,7 @@ function loginAs(v){
     role   = USERS[v].role;
     lang   = USERS[v].lang ? (localStorage.getItem("evo_lang_"+v)||"zh") : "es";
 
-    // Guardar sesión
     localStorage.setItem("evo_session", JSON.stringify({vendor: v}));
-
     applyLang();
 
     document.getElementById("login-screen").style.display = "none";
@@ -488,7 +485,6 @@ function loginAs(v){
         setTimeout(function(){ openChangePwd(true); }, 900);
     }
 
-    // Auto-refresh silencioso cada 60 segundos
     if(autoRefreshInterval) clearInterval(autoRefreshInterval);
     autoRefreshInterval = setInterval(function(){ silentRefresh(); }, 60000);
 
@@ -556,16 +552,12 @@ function applyLang(){
     if(fOpts[4]) fOpts[4].text = tx("st_closed");
 }
 
-// ── FETCH HELPER (CORS) ───────────────────────────────────────
+// ── FETCH HELPER ─────────────────────────────────────────────
 async function apiFetch(params){
     var url = SCRIPT_URL + "?" + new URLSearchParams(params).toString();
-    var res = await fetch(url, {
-        method: "GET",
-        redirect: "follow"
-    });
+    var res = await fetch(url, { method: "GET", redirect: "follow" });
     if(!res.ok) throw new Error("HTTP " + res.status);
-    var data = await res.json();
-    return data;
+    return await res.json();
 }
 
 // ── LOAD LEADS ────────────────────────────────────────────────
@@ -612,38 +604,34 @@ async function loadLeads(){
     }
 }
 
-// ── SILENT REFRESH (sin spinner, no interrumpe al usuario) ────
+// ── SILENT REFRESH ───────────────────────────────────────────
 async function silentRefresh(){
     try {
         var data = await apiFetch({action:"getLeads", vendedor:""});
         if(data.status !== "ok") return;
-
         var clean  = (data.clean ||[]).map(function(l){ return Object.assign({},l,{_type:"clean"}); });
         var sucios = (data.sucios||[]).map(function(l){ return Object.assign({},l,{_type:"sucio"}); });
-
         if(role==="vendor"){
             clean  = clean.filter(function(l){ var a=(l["ASIGNADO A"]||"").toUpperCase(); return a===vendor||a==="SIN ASIGNAR"||a===""; });
             sucios = sucios.filter(function(l){ var a=(l["ASIGNADO A"]||"").toUpperCase(); return a===vendor||a==="SIN ASIGNAR"||a===""; });
         }
         if(role==="nadia"){
-            clean  = clean.filter(function(l){ var a=(l["ASIGNADO A"]||"").toUpperCase(); return a==="NADIA"; });
-            sucios = sucios.filter(function(l){ var a=(l["ASIGNADO A"]||"").toUpperCase(); return a==="NADIA"; });
+            clean  = clean.filter(function(l){ return (l["ASIGNADO A"]||"").toUpperCase()==="NADIA"; });
+            sucios = sucios.filter(function(l){ return (l["ASIGNADO A"]||"").toUpperCase()==="NADIA"; });
         }
-
         var newLeads = clean.concat(sucios);
         newLeads.sort(function(a,b){ return new Date(b["Fecha"])-new Date(a["Fecha"]); });
-
-        // Solo actualizar si hay cambios reales
-        if(JSON.stringify(newLeads.map(function(l){ return l["Ticket ID"]+l["ESTATUS"]+l["NOTAS"]; })) !==
-           JSON.stringify(allLeads.map(function(l){ return l["Ticket ID"]+l["ESTATUS"]+l["NOTAS"]; }))){
+        var oldKey = JSON.stringify(allLeads.map(function(l){ return l["Ticket ID"]+l["ESTATUS"]+l["NOTAS"]; }));
+        var newKey = JSON.stringify(newLeads.map(function(l){ return l["Ticket ID"]+l["ESTATUS"]+l["NOTAS"]; }));
+        if(oldKey !== newKey){
             allLeads = newLeads;
             renderStats(); renderCharts(); renderTable(); showPizarron();
             showToast("🔄 Datos actualizados");
         }
-    } catch(e){
-        // Silencioso — no mostrar error en auto-refresh
-    }
+    } catch(e){ /* silencioso */ }
 }
+
+// ── STATS ─────────────────────────────────────────────────────
 function renderStats(){
     var total = allLeads.length;
     var clean = allLeads.filter(function(l){ return l._type==="clean"; }).length;
@@ -757,6 +745,7 @@ function renderTable(){
         var capital = txt(lead["Capital"], "—");
         var asignado = txt(lead["ASIGNADO A"], "SIN ASIGNAR");
         var notas = txt(lead["NOTAS"]);
+        var notasPreview = notas.length > 40 ? notas.substring(0,40)+"..." : notas;
 
         var statOpts = [
             {v:"Nuevo",       l:tx("st_new")},
@@ -765,7 +754,8 @@ function renderTable(){
             {v:"Cerrado",     l:tx("st_closed")}
         ];
 
-        var selectHtml = '<select class="status-select" data-tid="'+esc(tid)+'" data-sheet="'+esc(sht)+'" onchange="updateStatus(this)">'+
+        var rowNum = lead._row || "";
+        var selectHtml = '<select class="status-select" data-tid="'+esc(tid)+'" data-sheet="'+esc(sht)+'" data-row="'+rowNum+'" onchange="updateStatus(this)">'+
             statOpts.map(function(s){ return '<option value="'+s.v+'"'+(s.v===est?" selected":"")+">"+s.l+"</option>"; }).join("")+
         "</select>";
 
@@ -791,7 +781,7 @@ function renderTable(){
             '<td><small>'+esc(capital)+'</small></td>'+
             '<td><span class="badge '+(lead._type==="clean"?"badge-clean":"badge-sucio")+'">'+(lead._type==="clean"?tx("badge_clean"):tx("badge_prosp"))+'</span></td>'+
             '<td>'+selectHtml+'</td>'+
-            '<td>'+(notas ? '<span title="'+esc(notas)+'" style="display:inline-block;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--muted);cursor:help;">📝 '+esc(notas)+'</span>' : '<span style="font-size:11px;color:#d1d5db;">—</span>')+'</td>'+
+            '<td>'+(notas ? '<span title="'+esc(notas)+'" style="display:inline-block;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--muted);cursor:help;">📝 '+esc(notasPreview)+'</span>' : '<span style="font-size:11px;color:#d1d5db;">—</span>')+'</td>'+
             '<td>'+actionHtml+'</td>';
         tbody.appendChild(tr);
     });
@@ -803,7 +793,7 @@ async function updateStatus(sel){
     var est = sel.value;
     sel.disabled=true;
     try{
-        var data = await apiFetch({action:"updateLead", ticket_id:tid, sheet:sht, estatus:est});
+        var row = sel.getAttribute("data-row") || ""; var data = await apiFetch({action:"updateLead", ticket_id:tid, sheet:sht, row:row, estatus:est});
         if(data.status!=="ok") throw new Error(data.message||"Error");
         var l=allLeads.find(function(x){ return x["Ticket ID"]===tid; });
         if(l) l["ESTATUS"]=est;
@@ -845,7 +835,7 @@ async function saveNotes(){
     var btn    = document.querySelector("#modal-notes .modal-save");
     btn.textContent="..."; btn.disabled=true;
     try{
-        var data = await apiFetch({action:"updateLead", ticket_id:notesLead["Ticket ID"], sheet:notesLead._sheet, notas:notas, cierre:cierre});
+        var data = await apiFetch({action:"updateLead", ticket_id:notesLead["Ticket ID"], sheet:notesLead._sheet, row:notesLead._row||"", notas:notas, cierre:cierre});
         if(data.status!=="ok") throw new Error(data.message||"Error");
         var l=allLeads.find(function(x){ return x["Ticket ID"]===notesLead["Ticket ID"]; });
         if(l){ l["NOTAS"]=notas; l["CIERRE DE VENTAS"]=cierre; }
@@ -872,7 +862,7 @@ async function saveAssign(){
     var btn  = document.querySelector("#modal-assign .modal-save");
     btn.textContent="..."; btn.disabled=true;
     try{
-        var data = await apiFetch({action:"updateLead", ticket_id:assignLead["Ticket ID"], sheet:assignLead._sheet, asignado:newV});
+        var data = await apiFetch({action:"updateLead", ticket_id:assignLead["Ticket ID"], sheet:assignLead._sheet, row:assignLead._row||"", asignado:newV});
         if(data.status!=="ok") throw new Error(data.message||"Error");
         var l=allLeads.find(function(x){ return x["Ticket ID"]===assignLead["Ticket ID"]; });
         if(l) l["ASIGNADO A"]=newV;
@@ -940,30 +930,27 @@ function setPizarronTab(tab){
 
 function showPizarron(){
     var btn = document.getElementById("pizarron-float-btn");
+    var tabsBar = document.getElementById("pizarron-tabs-bar");
     if(!btn) return;
     btn.style.display = "flex";
     
     // Configure tabs based on role
     if(role==="admin"){
-        // Admins: see "Notas Yoana" tab + "Todos" tab, no "Mis Notas"
         document.getElementById("ptab-yoana").style.display = "block";
         document.getElementById("ptab-todos").style.display = "block";
         document.getElementById("ptab-vendedor").style.display = "none";
         if(pizarronTab === "vendedor") { pizarronTab = "todos"; setPizarronTab("todos"); }
     } else {
-        // Vendors: see "Mis Notas" tab + "Notas Yoana" tab
-        document.getElementById("ptab-vendedor").style.display = "block";
-        document.getElementById("ptab-yoana").style.display = "block";
+        document.getElementById("ptab-yoana").style.display = "none";
         document.getElementById("ptab-todos").style.display = "none";
+        document.getElementById("ptab-vendedor").style.display = "block";
     }
     
-    // Update badge with MY notes count
-    var myNotes = getLeadsWithNotes().filter(function(l){
-        return (l["ASIGNADO A"]||"").toUpperCase() === vendor.toUpperCase();
-    });
+    // Update badge
+    var notes = getLeadsWithNotes();
     var badge = document.getElementById("pizarron-badge");
-    if(myNotes.length > 0){
-        badge.textContent = myNotes.length;
+    if(notes.length > 0){
+        badge.textContent = notes.length;
         badge.style.display = "flex";
     } else {
         badge.style.display = "none";
@@ -979,19 +966,14 @@ function renderPizarron(){
     var leads = getLeadsWithNotes();
     
     if(role === "admin"){
-        // Admins: "todos" = all notes, "yoana" = only Yoana's notes
+        // For admins: tab todos = all notes, tab yoana = filter by YOANA
         if(pizarronTab === "yoana"){
             leads = leads.filter(function(l){ return (l["ASIGNADO A"]||"").toUpperCase() === "YOANA"; });
         }
         // "todos" shows everything
     } else {
-        // Vendors: "vendedor" = only their own notes, "yoana" = only Yoana's notes
-        if(pizarronTab === "yoana"){
-            leads = leads.filter(function(l){ return (l["ASIGNADO A"]||"").toUpperCase() === "YOANA"; });
-        } else {
-            // "vendedor" tab: show only MY notes
-            leads = leads.filter(function(l){ return (l["ASIGNADO A"]||"").toUpperCase() === vendor.toUpperCase(); });
-        }
+        // Vendors see only their own notes
+        leads = leads.filter(function(l){ return (l["ASIGNADO A"]||"").toUpperCase() === vendor.toUpperCase(); });
     }
     
     if(leads.length === 0){
