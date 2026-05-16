@@ -510,7 +510,7 @@ async function loadLeads(){
     var clean=(data.clean||[]).map(function(l){return Object.assign({},l,{_type:"clean"})});
     var sucios=(data.sucios||[]).map(function(l){return Object.assign({},l,{_type:"sucio"})});
     allLeads=applyRoleFilters(clean,sucios);
-    allLeads.sort(function(a,b){return new Date(b["Fecha"]||0)-new Date(a["Fecha"]||0)});
+    allLeads.sort(function(a,b){return new Date(b["Fecha de registro"]||0)-new Date(a["Fecha de registro"]||0)});
     document.getElementById("loading-main").style.display="none";
     document.getElementById("dashboard").style.display="block";
     document.getElementById("filter-vendor").style.display=role==="admin"?"block":"none";
@@ -674,7 +674,7 @@ function renderTable(){
       '<td>'+esc(ciudad)+'</td>'+
       '<td>'+esc(zonaTipo)+(zonaDetalle?'<br><small style="color:var(--muted);">'+esc(zonaDetalle)+'</small>':'')+'</td>'+
       '<td><small>'+esc(plazo)+'</small></td>'+
-      '<td><samll>'+esc(fecha)+'</small></td>'+
+      '<td><small>'+esc(fecha)+'</small></td>'+
       '<td><small>'+esc(capital)+'</small></td>'+
       '<td><span class="badge '+(lead._type==="clean"?"badge-clean":"badge-sucio")+'">'+(lead._type==="clean"?tx("badge_clean"):tx("badge_prosp"))+'</span></td>'+
       '<td>'+selectHtml+'</td>'+
