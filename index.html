@@ -9,7 +9,7 @@
 <style>
 :root{
   --green:#2b7a4b;--green-dark:#1a3d28;--green-deep:#0d2818;--green-light:#e8f5ee;--green-pale:#f4faf6;
-  --amber:#f59e0b;--amber-light:#fffbeb;--red:#ef4444;--red-light:#fff1f2;--blue:#3b82f6;--blue-light:#eff6ff;
+  --amber:#f59e0b;--amber-light:#fffbeb;--red:#ef4444;--blue:#3b82f6;--blue-light:#eff6ff;
   --purple:#8b5cf6;--ink:#0d1f13;--muted:#6b7c72;--border:#dde8e2;--card:#fff;--bg:#eef3f0;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -17,10 +17,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 h1,h2,h3,h4{font-family:'Syne',sans-serif}
 button,input,select,textarea{font-family:'DM Sans',sans-serif}
 
-#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#071f12,#1e5937 55%,#0d2818);position:relative;padding:20px}
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#071f12,#1f5f3d 55%,#0d2818);position:relative;padding:20px}
 #login-screen:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 15%,rgba(255,255,255,.16),transparent 28%),rgba(8,30,16,.42)}
 .login-card{position:relative;z-index:1;background:rgba(255,255,255,.97);border-radius:24px;padding:44px;width:100%;max-width:420px;box-shadow:0 32px 80px rgba(0,0,0,.35);text-align:center}
-.logo-mark{width:64px;height:64px;border-radius:18px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-family:'Syne';font-weight:800;font-size:24px;margin-bottom:22px}
+.login-logo-wrap{width:120px;height:72px;margin:0 auto 20px;display:flex;align-items:center;justify-content:center}
+.login-logo-img{max-width:120px;max-height:64px;width:auto;height:auto;object-fit:contain;display:block}
+.logo-fallback{width:64px;height:64px;border-radius:18px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-family:'Syne';font-weight:800;font-size:24px}
 .login-card h2{font-size:21px;font-weight:800;margin-bottom:7px}
 .login-card p{font-size:12px;color:var(--muted);margin-bottom:24px;font-weight:600}
 .login-field{width:100%;border:1.5px solid var(--border);padding:13px 16px;border-radius:12px;font-size:13px;font-weight:600;color:var(--ink);background:var(--green-pale);margin-bottom:12px}
@@ -32,7 +34,9 @@ button,input,select,textarea{font-family:'DM Sans',sans-serif}
 #app{display:none;flex-direction:column;min-height:100vh}
 .topbar{height:64px;background:linear-gradient(135deg,#082111,#235f3d);padding:0 32px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .topbar-left,.topbar-right{display:flex;align-items:center;gap:12px}
-.top-logo{width:34px;height:34px;border-radius:10px;background:#fff;color:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Syne';font-weight:800}
+.top-logo-wrap{width:54px;height:42px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.top-logo-img{max-width:54px;max-height:36px;width:auto;height:auto;object-fit:contain;display:block;filter:brightness(1.08)}
+.top-logo-fallback{width:34px;height:34px;border-radius:10px;background:#fff;color:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Syne';font-weight:800}
 .topbar-divider{width:1px;height:24px;background:rgba(255,255,255,.25)}
 .topbar-title{color:#fff;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;font-family:'Syne'}
 .vendor-badge{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:11px;font-weight:700;padding:5px 14px;border-radius:99px}
@@ -126,7 +130,9 @@ button,input,select,textarea{font-family:'DM Sans',sans-serif}
 
 <div id="login-screen">
   <div class="login-card">
-    <div class="logo-mark">EV</div>
+    <div class="login-logo-wrap">
+      <div class="logo-fallback">EV</div>
+    </div>
     <h2 id="login-title">CRM Distribuidores</h2>
     <p id="login-sub">Ingresa tu nombre y contraseña para acceder</p>
     <input type="text" id="login-vendor" class="login-field" placeholder="Tu nombre (ej: Dylan)" autocomplete="off">
@@ -139,7 +145,9 @@ button,input,select,textarea{font-family:'DM Sans',sans-serif}
 <div id="app">
   <div class="topbar">
     <div class="topbar-left">
-      <div class="top-logo">EV</div>
+      <div class="top-logo-wrap">
+        <div class="top-logo-fallback">EV</div>
+      </div>
       <div class="topbar-divider"></div>
       <span class="topbar-title" id="topbar-title">CRM Distribuidores</span>
     </div>
@@ -260,14 +268,7 @@ button,input,select,textarea{font-family:'DM Sans',sans-serif}
     <h3>Reasignar Lead</h3>
     <p class="modal-sub" id="assign-sub"></p>
     <span class="modal-label">Asignar a vendedor</span>
-    <select class="modal-input" id="assign-select">
-      <option value="SIN ASIGNAR">SIN ASIGNAR</option>
-      <option value="DYLAN">Dylan</option>
-      <option value="YOANA">Yoana</option>
-      <option value="CINDY">Cindy</option>
-      <option value="ERET">Eret</option>
-      <option value="NADIA">Nadia</option>
-    </select>
+    <select class="modal-input" id="assign-select"></select>
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closeAssign()">Cancelar</button>
       <button class="modal-save" onclick="saveAssign()">Reasignar</button>
@@ -335,7 +336,7 @@ button,input,select,textarea{font-family:'DM Sans',sans-serif}
 <div id="toast"></div>
 
 <script>
-var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxxTD48O4caExb92o58qXi-hGN3gW7wb0rNK_wwEB0kV0HfxKi5BuaGj18YD6tMQLJHxQ/exec";
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyBPHTkYc83g-1JgRVRzrmxU-WMmFKvnRU2ic6mvyRWb31GbCd4GEIlupPTBRdNUVE5KA/exec";
 var DEFAULT_PASS = "evobike2026";
 
 var USERS = {
@@ -589,6 +590,10 @@ function setTab(tab){
   renderTable();
 }
 
+function canAssignLead(){
+  return role==="admin" || vendor==="CINDY" || vendor==="ERET";
+}
+
 function renderTable(){
   var search=txt(document.getElementById("search-input").value).toLowerCase();
   var estF=txt(document.getElementById("filter-estatus").value);
@@ -655,7 +660,7 @@ function renderTable(){
 
     var actionHtml='<div style="display:flex;gap:6px;flex-wrap:wrap;">'+
       '<button class="action-btn" data-tid="'+esc(tid)+'" onclick="openNotes(this)">'+tx("notes")+'</button>'+
-      (isAdm?'<button class="action-btn action-btn-blue" data-tid="'+esc(tid)+'" onclick="openAssign(this)">'+tx("assign")+'</button>':'')+
+      (canAssignLead()?'<button class="action-btn action-btn-blue" data-tid="'+esc(tid)+'" onclick="openAssign(this)">'+tx("assign")+'</button>':'')+
       '<a href="'+waUrl+'" target="_blank" class="action-btn action-btn-wa">'+tx("wa_btn")+'</a>'+
       '</div>';
 
@@ -677,7 +682,6 @@ function renderTable(){
 }
 
 async function updateStatus(sel){
-  var previous=sel.getAttribute("data-prev")||"Nuevo";
   var est=sel.value;
   if(est==="Cerrado"){
     pendingCloseSelect=sel;
@@ -785,8 +789,26 @@ function openAssign(btn){
   var tid=btn.getAttribute("data-tid");
   assignLead=allLeads.find(function(l){return l["Ticket ID"]===tid});
   if(!assignLead)return;
+
   document.getElementById("assign-sub").textContent=txt(assignLead["Nombre"])+" — "+txt(assignLead["Ticket ID"]);
-  document.getElementById("assign-select").value=txt(assignLead["ASIGNADO A"],"SIN ASIGNAR");
+  var select=document.getElementById("assign-select");
+
+  if(role==="admin"){
+    select.innerHTML=
+      '<option value="SIN ASIGNAR">SIN ASIGNAR</option>'+
+      '<option value="DYLAN">Dylan</option>'+
+      '<option value="YOANA">Yoana</option>'+
+      '<option value="CINDY">Cindy</option>'+
+      '<option value="ERET">Eret</option>'+
+      '<option value="NADIA">Nadia</option>';
+    select.value=txt(assignLead["ASIGNADO A"],"SIN ASIGNAR");
+  }else if(vendor==="CINDY"||vendor==="ERET"){
+    select.innerHTML='<option value="NADIA">Nadia</option>';
+    select.value="NADIA";
+  }else{
+    return;
+  }
+
   document.getElementById("modal-assign").classList.add("open");
 }
 function closeAssign(){document.getElementById("modal-assign").classList.remove("open");assignLead=null}
@@ -796,13 +818,34 @@ async function saveAssign(){
   var btn=document.querySelector("#modal-assign .modal-save");
   btn.textContent="...";btn.disabled=true;
   try{
-    var data=await apiFetch({action:"updateLead",ticket_id:assignLead["Ticket ID"],sheet:assignLead._sheet,row:assignLead._row||"",asignado:newV});
+    var reassignedNote=newV==="NADIA"?"Contacto re-asignado":"";
+    var data=await apiFetch({
+      action:"updateLead",
+      ticket_id:assignLead["Ticket ID"],
+      sheet:assignLead._sheet,
+      row:assignLead._row||"",
+      asignado:newV,
+      notas:reassignedNote ? appendNote(txt(assignLead["NOTAS"]),reassignedNote) : txt(assignLead["NOTAS"])
+    });
     if(data.status!=="ok")throw new Error(data.message||"Error");
+
     var l=allLeads.find(function(x){return x["Ticket ID"]===assignLead["Ticket ID"]});
-    if(l)l["ASIGNADO A"]=newV;
-    closeAssign();showToast(tx("saved_assign"));loadLeads();
+    if(l){
+      l["ASIGNADO A"]=newV;
+      if(reassignedNote)l["NOTAS"]=appendNote(txt(l["NOTAS"]),reassignedNote);
+    }
+
+    closeAssign();
+    showToast(tx("saved_assign"));
+    loadLeads();
   }catch(e){showToast("⚠️ "+e.message)}
   finally{btn.textContent="Reasignar";btn.disabled=false}
+}
+
+function appendNote(current,note){
+  current=txt(current).trim();
+  if(current.includes(note))return current;
+  return current?current+"\n"+note:note;
 }
 
 function openChangePwd(isFirst){
