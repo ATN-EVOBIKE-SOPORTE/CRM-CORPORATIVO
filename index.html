@@ -636,9 +636,9 @@ function renderTable(){
     var zonaDetalle=txt(lead["Zona Detalle"]);
     var plazo=txt(lead["Plazo"],"—").split("(")[0].trim();
     var capital=txt(lead["Capital"],"—");
-     var fecha = lead["Fecha"]
-            ? new Date(lead["Fecha"]).toLocaleDateString("es-MX")
-            : "";;
+    var fecha = lead["Fecha"]
+        ? new Date(lead["Fecha"]).toLocaleDateString("es-MX")
+        : "";;
     var asignado=txt(lead["ASIGNADO A"],"SIN ASIGNAR");
     var notas=txt(lead["NOTAS"]);
     var notasPreview=notas.length>40?notas.substring(0,40)+"...":notas;
