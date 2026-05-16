@@ -231,7 +231,7 @@ button,input,select,textarea{font-family:'DM Sans',sans-serif}
           <table class="leads-table" id="leads-table">
             <thead>
               <tr>
-                <th>Ticket</th><th>Nombre</th><th>Teléfono</th><th>Ciudad</th><th>Zona</th><th>Plazo</th>
+                <th>Fecha de registro</th><th>Ticket</th><th>Nombre</th><th>Teléfono</th><th>Ciudad</th><th>Zona</th><th>Plazo</th>
                 <th>Capital</th><th>Tipo</th><th>Estatus</th><th>Venta</th><th>Notas</th><th>Acciones</th>
               </tr>
             </thead>
@@ -354,7 +354,7 @@ var LANG = {
     assigned:"asignados a ti",all_leads:"leads totales",priority:"prioridad alta",following:"contactados + seguimiento",
     conversion:"% conversión",tab_all:"Todos",tab_clean:"⭐ Clean",tab_prosp:"Prospectos",my_leads:"Mis Leads",
     search:"Buscar...",ticket:"Ticket",name:"Nombre",phone:"Teléfono",city:"Ciudad",zone:"Zona",term:"Plazo",
-    capital:"Capital",type:"Tipo",status:"Estatus",sale:"Venta",notes_col:"Notas",actions:"Acciones",
+    capital:"Capital",date:"Fecha de registro",type:"Tipo",status:"Estatus",sale:"Venta",notes_col:"Notas",actions:"Acciones",
     notes:"Notas",assign:"Asignar",wa_btn:"WhatsApp",empty:"No se encontraron leads",
     st_new:"Nuevo",st_contacted:"Contactado",st_follow:"Seguimiento",st_closed:"Cerrado",
     badge_clean:"⭐ Clean",badge_prosp:"Prospecto",chart1:"Estatus de Leads",chart2:"Plazo de Iniciación",chart3:"Zona de Operación",
@@ -369,7 +369,7 @@ var LANG = {
     assigned:"分配给您",all_leads:"总线索数",priority:"高优先级",following:"已联系+跟进",
     conversion:"% 转化率",tab_all:"全部",tab_clean:"⭐ 优质",tab_prosp:"潜在客户",my_leads:"我的线索",
     search:"搜索...",ticket:"编号",name:"姓名",phone:"电话",city:"城市",zone:"区域",term:"启动时间",
-    capital:"资金",type:"类型",status:"状态",sale:"销售",notes_col:"备注",actions:"操作",
+    capital:"资金",date:"注册日期",type:"类型",status:"状态",sale:"销售",notes_col:"备注",actions:"操作",
     notes:"备注",assign:"分配",wa_btn:"WhatsApp",empty:"未找到符合条件的线索",
     st_new:"新建",st_contacted:"已联系",st_follow:"跟进中",st_closed:"已成交",
     badge_clean:"⭐ 优质",badge_prosp:"潜在",chart1:"线索状态",chart2:"启动时间",chart3:"运营区域",
@@ -478,7 +478,7 @@ function applyLang(){
   document.getElementById("chart-title-2").textContent=tx("chart2");
   document.getElementById("chart-title-3").textContent=tx("chart3");
   var ths=document.querySelectorAll(".leads-table th");
-  var hdr=["ticket","name","phone","city","zone","term","capital","type","status","sale","notes_col","actions"];
+  var hdr=["ticket","name","phone","city","zone","term","date","capital","type","status","sale","notes_col","actions"];
   ths.forEach(function(th,i){if(hdr[i])th.textContent=tx(hdr[i])});
 }
 
@@ -636,6 +636,9 @@ function renderTable(){
     var zonaDetalle=txt(lead["Zona Detalle"]);
     var plazo=txt(lead["Plazo"],"—").split("(")[0].trim();
     var capital=txt(lead["Capital"],"—");
+     var fecha = lead["Fecha"]
+            ? new Date(lead["Fecha"]).toLocaleDateString("es-MX")
+            : "";;
     var asignado=txt(lead["ASIGNADO A"],"SIN ASIGNAR");
     var notas=txt(lead["NOTAS"]);
     var notasPreview=notas.length>40?notas.substring(0,40)+"...":notas;
@@ -671,6 +674,7 @@ function renderTable(){
       '<td>'+esc(ciudad)+'</td>'+
       '<td>'+esc(zonaTipo)+(zonaDetalle?'<br><small style="color:var(--muted);">'+esc(zonaDetalle)+'</small>':'')+'</td>'+
       '<td><small>'+esc(plazo)+'</small></td>'+
+      '<td><samll>'+esc(fecha)+'</small></td>'+
       '<td><small>'+esc(capital)+'</small></td>'+
       '<td><span class="badge '+(lead._type==="clean"?"badge-clean":"badge-sucio")+'">'+(lead._type==="clean"?tx("badge_clean"):tx("badge_prosp"))+'</span></td>'+
       '<td>'+selectHtml+'</td>'+
@@ -761,6 +765,7 @@ function openNotes(btn){
     ["Teléfono",txt(notesLead["Teléfono"],"—")],
     ["Zona",txt(notesLead["Zona Tipo"],"—")+(notesLead["Zona Detalle"]?" - "+notesLead["Zona Detalle"]:"")],
     ["Capital",txt(notesLead["Capital"],"—")],
+    ["Fecha",txt(notesLead["Fecha"]||""],
     ["Plazo",txt(notesLead["Plazo"],"—").split("(")[0].trim()],
     ["Contacto",txt(notesLead["¿Desea contacto?"],"—")],
     ["Asignado",txt(notesLead["ASIGNADO A"],"—")]
