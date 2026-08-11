@@ -1,6 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 
-const MODEL = 'gemini-2.5-flash';
+const MODEL = 'gemini-3.6-flash';
 
 const responseSchema = {
   type: 'object',
@@ -84,7 +84,6 @@ export async function generateClientFollowUp(lead) {
     config: {
       responseMimeType: 'application/json',
       responseSchema,
-      temperature: 0.35,
       maxOutputTokens: 700
     }
   });
