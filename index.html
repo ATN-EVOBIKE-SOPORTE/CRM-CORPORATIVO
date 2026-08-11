@@ -372,7 +372,7 @@ function renderPizarron(){var body=document.getElementById("pizarron-body");var 
 </section>
 <script id="crm-ai-script">
 (function(){
-  var CRM_AI_ENDPOINT = window.EVOBIKE_AI_ENDPOINT || "http://localhost:3000/api/clients/ai-follow-up";
+  var CRM_AI_ENDPOINT = window.EVOBIKE_AI_ENDPOINT || "https://crm-corporativo.onrender.com/api/clients/ai-follow-up";
   var CRM_STATUS = "Nuevo";
   var oldRenderTable = window.renderTable;
   function statusCounts(){var data={Nuevo:0,Contactado:0,Seguimiento:0,Cerrado:0};(window.allLeads||[]).forEach(function(l){var s=l["ESTATUS"]||"Nuevo";if(data[s]!==undefined)data[s]++;});return data;}
