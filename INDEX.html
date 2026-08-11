@@ -136,7 +136,16 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;}
 @media(max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr);}.charts-row{grid-template-columns:1fr;}.main{padding:16px;}.topbar{padding:0 16px;}}
 @media(max-width:600px){.stats-grid{grid-template-columns:1fr 1fr;}.search-input{width:140px;}}
 </style>
-</head>
+
+<style id="crm-ai-styles">
+#crm-status-sidebar{position:fixed;top:64px;bottom:0;left:0;width:218px;background:#fff;border-right:1px solid var(--border);padding:20px 12px;z-index:40;overflow:auto}
+.crm-side-caption{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);font-weight:800;padding:0 10px 9px}
+.crm-status-nav{display:flex;flex-direction:column;gap:5px}.crm-status-btn{border:0;background:transparent;color:var(--ink);font:700 13px 'DM Sans',sans-serif;text-align:left;padding:11px 10px;border-radius:9px;display:flex;justify-content:space-between;align-items:center}.crm-status-btn:hover{background:var(--green-pale)}.crm-status-btn.active{background:var(--green-light);color:var(--green)}.crm-status-count{font-size:10px;min-width:22px;padding:3px 7px;text-align:center;border-radius:999px;background:#e8eeea}.crm-status-btn.active .crm-status-count{background:#fff}.crm-side-note{font-size:11px;line-height:1.45;color:var(--muted);padding:16px 10px}
+@media(min-width:901px){#app .main{margin-left:218px;width:calc(100% - 218px)}}@media(max-width:900px){#crm-status-sidebar{position:sticky;top:0;width:100%;height:auto;padding:8px;z-index:40;border-right:0;border-bottom:1px solid var(--border)}.crm-side-caption,.crm-side-note{display:none}.crm-status-nav{flex-direction:row;overflow:auto}.crm-status-btn{white-space:nowrap;font-size:12px;padding:8px 10px}.crm-status-count{display:none}}
+#crm-ai-toggle{position:fixed;right:24px;bottom:24px;z-index:90;border:0;border-radius:50%;width:56px;height:56px;background:var(--green);box-shadow:0 7px 22px rgba(43,122,75,.35);color:#fff;font-size:23px}
+#crm-ai-panel{position:fixed;right:24px;bottom:92px;width:min(390px,calc(100vw - 32px));max-height:min(660px,calc(100vh - 112px));z-index:90;background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:auto;display:none}#crm-ai-panel.open{display:block}
+.crm-ai-head{padding:15px 18px;background:var(--green-deep);color:#fff;display:flex;align-items:center;justify-content:space-between}.crm-ai-head strong{font:800 14px Syne,sans-serif}.crm-ai-head span{font-size:10px;opacity:.8}.crm-ai-close{border:0;background:transparent;color:#fff;font-size:18px}.crm-ai-body{padding:16px}.crm-ai-body label{display:block;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin:10px 0 6px}.crm-ai-body input,.crm-ai-body select,.crm-ai-body textarea{width:100%;border:1px solid var(--border);border-radius:9px;padding:9px 10px;background:var(--green-pale);font:12px 'DM Sans',sans-serif}.crm-ai-body textarea{min-height:70px;resize:vertical}.crm-ai-run{width:100%;margin-top:14px;border:0;border-radius:9px;padding:11px;background:var(--green);color:#fff;font:800 12px Syne,sans-serif;letter-spacing:.4px}.crm-ai-result{display:none;margin-top:15px;border-top:1px solid var(--border);padding-top:13px}.crm-ai-result.show{display:block}.crm-ai-card{background:var(--green-pale);border-radius:9px;padding:10px;margin:8px 0;font-size:12px;line-height:1.45}.crm-ai-card b{display:block;font-size:10px;color:var(--green);letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px}.crm-ai-error{color:var(--red);font-size:11px;margin-top:9px}.crm-ai-row{display:grid;grid-template-columns:1fr 110px;gap:8px}.crm-ai-action{border:0;background:#eef5ff;color:var(--blue);border-radius:7px;padding:5px 7px;font-size:10px;font-weight:800}
+</style></head>
 <body>
 
 <!-- LOGIN -->
@@ -1593,5 +1602,50 @@ function showToast(msg){
     setTimeout(function(){ el.classList.remove("show"); },3000);
 }
 </script>
-</body>
+
+<aside id="crm-status-sidebar" aria-label="Secciones de leads">
+  <div class="crm-side-caption">Embudo de ventas</div>
+  <nav class="crm-status-nav">
+    <button class="crm-status-btn active" data-crm-status="Nuevo">Nuevos <span class="crm-status-count">0</span></button>
+    <button class="crm-status-btn" data-crm-status="Contactado">Contactados <span class="crm-status-count">0</span></button>
+    <button class="crm-status-btn" data-crm-status="Seguimiento">Seguimiento <span class="crm-status-count">0</span></button>
+    <button class="crm-status-btn" data-crm-status="Cerrado">Cerrados <span class="crm-status-count">0</span></button>
+  </nav>
+  <p class="crm-side-note">Cada sección muestra exclusivamente los leads de ese estatus.</p>
+</aside>
+<button id="crm-ai-toggle" type="button" aria-label="Abrir asistente IA">✨</button>
+<section id="crm-ai-panel" aria-label="Asistente de ventas IA">
+ <div class="crm-ai-head"><div><strong>Asistente IA</strong><br><span>Próximo paso para tu lead</span></div><button class="crm-ai-close" type="button" aria-label="Cerrar">×</button></div>
+ <div class="crm-ai-body">
+  <div class="crm-ai-row"><div><label>Nombre del cliente</label><input id="crm-ai-name" placeholder="Nombre"></div><div><label>Días inactivo</label><input id="crm-ai-days" type="number" min="0" value="0"></div></div>
+  <label>Empresa</label><input id="crm-ai-company" placeholder="Empresa o negocio">
+  <label>Etapa del embudo</label><select id="crm-ai-stage"><option>Nuevo</option><option>Contactado</option><option>Seguimiento</option><option>Cerrado</option></select>
+  <label>Última nota</label><textarea id="crm-ai-note" placeholder="Última interacción con el cliente"></textarea>
+  <button id="crm-ai-run" class="crm-ai-run" type="button">Generar recomendación</button>
+  <div id="crm-ai-error" class="crm-ai-error"></div>
+  <div id="crm-ai-result" class="crm-ai-result"></div>
+ </div>
+</section>
+<script id="crm-ai-script">
+(function(){
+  var CRM_AI_ENDPOINT = window.EVOBIKE_AI_ENDPOINT || "http://localhost:3000/api/clients/ai-follow-up";
+  var CRM_STATUS = "Nuevo";
+  var oldRenderTable = window.renderTable;
+  function statusCounts(){var data={Nuevo:0,Contactado:0,Seguimiento:0,Cerrado:0};(window.allLeads||[]).forEach(function(l){var s=l["ESTATUS"]||"Nuevo";if(data[s]!==undefined)data[s]++;});return data;}
+  function refreshSidebar(){var counts=statusCounts();document.querySelectorAll("[data-crm-status]").forEach(function(btn){var s=btn.getAttribute("data-crm-status");btn.classList.toggle("active",s===CRM_STATUS);btn.querySelector(".crm-status-count").textContent=counts[s]||0;});}
+  function addAiLeadButtons(){document.querySelectorAll("#leads-tbody .status-select").forEach(function(select){var tid=select.getAttribute("data-tid");var holder=select.closest("tr")&&select.closest("tr").querySelector("td:last-child div");if(!holder||holder.querySelector("[data-ai-ticket]"))return;var b=document.createElement("button");b.type="button";b.className="crm-ai-action";b.textContent="✨ IA";b.setAttribute("data-ai-ticket",tid);b.addEventListener("click",function(){openForLead(tid);});holder.appendChild(b);});}
+  window.renderTable=function(){var filter=document.getElementById("filter-estatus");if(!filter||typeof oldRenderTable!=="function")return;window.currentTab="todos";filter.value=CRM_STATUS;oldRenderTable();refreshSidebar();addAiLeadButtons();};
+  window.updateStatus=async function(sel){var tid=sel.getAttribute("data-tid"),sht=sel.getAttribute("data-sheet"),est=sel.value,previous=(window.allLeads||[]).find(function(x){return x["Ticket ID"]===tid;})||{};sel.disabled=true;try{var res=await fetch(window.SCRIPT_URL,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({action:"updateLead",ticket_id:tid,sheet:sht,estatus:est}).toString()});var data=await res.json();if(data.status!=="ok")throw new Error(data.message||"Error");previous["ESTATUS"]=est;if(typeof window.renderStats==="function")window.renderStats();if(typeof window.renderCharts==="function")window.renderCharts();window.renderTable();if(typeof window.showToast==="function")window.showToast("Lead movido a "+est+".");}catch(e){sel.value=previous["ESTATUS"]||"Nuevo";if(typeof window.showToast==="function")window.showToast("⚠️ "+e.message);}finally{sel.disabled=false;}};
+  function selectStatus(s){CRM_STATUS=s;window.renderTable();}
+  document.querySelectorAll("[data-crm-status]").forEach(function(btn){btn.addEventListener("click",function(){selectStatus(btn.getAttribute("data-crm-status"));});});
+  ["tab-todos","tab-clean","tab-sucios"].forEach(function(id){var b=document.getElementById(id);if(b)b.style.display="none";});
+  function byId(id){return document.getElementById(id);}
+  function panel(open){byId("crm-ai-panel").classList.toggle("open",open);}
+  function openForLead(tid){var lead=(window.allLeads||[]).find(function(x){return x["Ticket ID"]===tid;})||{};byId("crm-ai-name").value=lead["Nombre"]||"";byId("crm-ai-company").value=lead["Empresa"]||lead["Ciudad"]||"";byId("crm-ai-stage").value=lead["ESTATUS"]||"Nuevo";byId("crm-ai-note").value=lead["NOTAS"]||"";byId("crm-ai-days").value=0;panel(true);}
+  byId("crm-ai-toggle").addEventListener("click",function(){panel(!byId("crm-ai-panel").classList.contains("open"));});document.querySelector(".crm-ai-close").addEventListener("click",function(){panel(false);});
+  byId("crm-ai-run").addEventListener("click",async function(){var button=this,error=byId("crm-ai-error"),result=byId("crm-ai-result");error.textContent="";result.classList.remove("show");var payload={name:byId("crm-ai-name").value.trim(),company:byId("crm-ai-company").value.trim(),funnelStage:byId("crm-ai-stage").value,lastNote:byId("crm-ai-note").value.trim(),daysInactive:Number(byId("crm-ai-days").value||0)};if(!payload.name){error.textContent="Indica el nombre del cliente.";return;}button.disabled=true;button.textContent="Analizando…";try{var response=await fetch(CRM_AI_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});var data=await response.json();if(!response.ok)throw new Error(data.error||"No se pudo generar la recomendación.");result.innerHTML='<div class="crm-ai-card"><b>Resumen</b>'+escapeHtml(data.summary)+'</div><div class="crm-ai-card"><b>Próxima acción · '+escapeHtml(data.urgencyLevel)+'</b>'+escapeHtml(data.nextAction)+'</div><div class="crm-ai-card"><b>Borrador de correo</b>'+escapeHtml(data.suggestedEmailDraft).replace(/\n/g,"<br>")+'</div>';result.classList.add("show");}catch(e){error.textContent=e.message+" Configura EVOBIKE_AI_ENDPOINT con la URL pública del backend cuando lo despliegues.";}finally{button.disabled=false;button.textContent="Generar recomendación";}});
+  function escapeHtml(v){return String(v||"").replace(/[&<>\"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+  setTimeout(function(){window.renderTable();},0);
+})();
+</script></body>
 </html>
