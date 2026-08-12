@@ -62,6 +62,20 @@ function validateResult(result) {
     urgencyLevel: result.urgencyLevel
   };
 }
+function parseJsonResponse(text) {
+  const fence = String.fromCharCode(96).repeat(3);
+  let normalized = String(text).trim();
+  if (normalized.startsWith(fence)) normalized = normalized.slice(fence.length).replace(/^json\s*/i, '').trim();
+  if (normalized.endsWith(fence)) normalized = normalized.slice(0, -fence.length).trim();
+  try {
+    return JSON.parse(normalized);
+  } catch (firstError) {
+    const start = normalized.indexOf('{');
+    const end = normalized.lastIndexOf('}');
+    if (start >= 0 && end > start) return JSON.parse(normalized.slice(start, end + 1));
+    throw firstError;
+  }
+}
 
 export async function generateClientFollowUp(lead) {
   const clientData = normalizeLead(lead);
@@ -90,7 +104,7 @@ export async function generateClientFollowUp(lead) {
 
   if (!response.text) throw new Error('Gemini no devolvió contenido.');
   try {
-    return validateResult(JSON.parse(response.text));
+    return validateResult(parseJsonResponse(response.text));
   } catch (error) {
     if (error instanceof SyntaxError) throw new Error('Gemini devolvió JSON inválido.');
     throw error;
