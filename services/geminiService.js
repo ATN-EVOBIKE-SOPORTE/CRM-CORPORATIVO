@@ -92,19 +92,19 @@ export async function generateClientFollowUp(lead) {
     '- urgencyLevel: BAJA, MEDIA o ALTA. Usa ALTA cuando requiera seguimiento inmediato.'
   ].join('\n');
 
-  const response = await getClient().models.generateContent({
+  const interaction = await getClient().interactions.create({
     model: MODEL,
-    contents: prompt,
-    config: {
-      responseMimeType: 'application/json',
-      responseSchema,
-      maxOutputTokens: 700
+    input: prompt,
+    response_format: {
+      type: 'text',
+      mime_type: 'application/json',
+      schema: responseSchema
     }
   });
 
-  if (!response.text) throw new Error('Gemini no devolvió contenido.');
+  if (!interaction.output_text) throw new Error('Gemini no devolvió contenido.');
   try {
-    return validateResult(parseJsonResponse(response.text));
+    return validateResult(parseJsonResponse(interaction.output_text));
   } catch (error) {
     if (error instanceof SyntaxError) throw new Error('Gemini devolvió JSON inválido.');
     throw error;
